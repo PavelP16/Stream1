@@ -15,25 +15,25 @@ import static org.springframework.util.StringUtils.capitalize;
 @Service
 public class EmployeeService {
 
-    private static int SIZE = 10;  //Недопустимое количество мест в Мапе
+    private static int SIZE = 10;
     private final Map<String, Employee> employees = new HashMap<>();
 
     public void addEmployee(String firstName, String lastName, double salary, int deportmentId) {
-        if (employees.size() == SIZE) {  //Если количество элементов Мапы сравнялось с предельным, то выбрасываем EmployeeStorageIsFullException()
+        if (employees.size() == SIZE) {
             throw new EmployeeStorageIsFullException();
         }
-        var key = makeKey(firstName, lastName);  //Создаём ключ по встроенному методу как имя+фамилия в виде только строчных букв
-        if (employees.containsKey(key)) { //Если уже имеется такой ключ в Мапе, то выбрасываем EmployeeAlreadyAddException().
+        var key = makeKey(firstName, lastName);
+        if (employees.containsKey(key)) {
                         throw new EmployeeAlreadyAddException();
         }
         employees.put(key, new Employee(capitalize(firstName),
                 capitalize (lastName),
                 salary,
-                deportmentId )); //создаем нового сотрудника с обращением строчной начальной буквы в имени и фамилии в прописную (если они не были прописными изначально)
+                deportmentId ));
     }
 
     public Employee findEmployee(String firstName, String lastName) {
-        var emp = employees.get(makeKey(firstName, lastName));  //Находим сотрудника в Мапе по его ключу
+        var emp = employees.get(makeKey(firstName, lastName));
         if (emp == null) {
             throw new EmployeeNotFoundException("Такого сотрудника нет!");
         }
@@ -41,15 +41,15 @@ public class EmployeeService {
     }
 
     public boolean removeEmployee(String firstName, String lastName) {
-        Employee removed = employees.remove(makeKey(firstName, lastName)); //Удаляем элемент в Мапе по его ключу
-        if (removed == null) {  //Если такого элемента нет, то кидаем EmployeeNotFoundException()
+        Employee removed = employees.remove(makeKey(firstName, lastName));
+        if (removed == null) {
                         throw new EmployeeNotFoundException();
         }
         return true;
     }
 
     public Collection<Employee> getAll() {
-        return employees.values();  //Выводим всех сотрудников в Мапе
+        return employees.values();
     }
 
     private String makeKey(String firstName, String lastName) {  //Встроенный метод для формирования ключа имя+фамилия, состоящего только из строчных букв

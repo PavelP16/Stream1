@@ -1,8 +1,8 @@
 package com.skypro.stream1.controller.service;
 
-import org.springframework.stereotype.Service;
-import com.skypro.stream1.controller.model.Employee;
 import com.skypro.stream1.controller.exceptions.EmployeeNotFoundException;
+import com.skypro.stream1.controller.model.Employee;
+import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
@@ -11,49 +11,41 @@ import java.util.stream.Collectors;
 
 @Service
 public class DepartmentService {
-    private final EmployeeService employeeService;
+    private final List<Employee> employees;
 
-    public DepartmentService(EmployeeService employeeService) {
-        this.employeeService = employeeService;
+    public DepartmentService(List<Employee> employees) {
+        this.employees = employees;
     }
 
-    public double maxSalary(int deptId) {  //Метод определения максимальной зарплаты по выбранному департаменту
-        return employeeService.getAll()  //Список сотрудников из Мапы
-                .stream()
-                .filter(e -> e.getDepartment() == deptId)  //Фильтрация Мапы только по нужному департаменту
-                .map(Employee::getSalary)  //Превращение Мапы в Список зарплат
-                .max(Comparator.comparingDouble(o->o))//Определение максимальной зарплаты из Списка с типом данных Double (это уже Option пошёл)
-
-                .orElseThrow(() -> new EmployeeNotFoundException("Нет значений"));
-
-    }
-    public double minSalary(int deptId) {  //Метод определения минимальной зарплаты по выбранному департаменту
-        return employeeService.getAll()
-                .stream()
-                .filter(e -> e.getDepartment() == deptId)
-                .map(Employee::getSalary)
-                .min(Comparator.comparingDouble(o->o))
-                .orElseThrow(() -> new EmployeeNotFoundException("Нет сотрудников в департаменте!"));
-    }
-    public List<Employee> findAllByDept(int deptId) {
-        return employeeService.getAll()  //Список сотрудников из Мапы
-                .stream()
-                .filter(e -> e.getDepartment() == deptId)  //Фильтрация Списка только по нужному департаменту
-                .collect(Collectors.toList());  //Вывод Списка всех сотрудников департамента
+    public double sum(int departmentId) {
+        return employees.stream()
+                .filter(e -> e.getDepartment() == departmentId)
+                .mapToDouble(Employee::getSalary)
+                .sum();
     }
 
-    public Map<Integer, List<Employee>> groupDeDept() {  //Формирование Мапы, где ключ - номер департамента, а значение - сотрудник этого департамента
-        Map<Integer, List<Employee>> map = employeeService.getAll()  //Список сотрудников из Мапы
-                .stream()
-                .collect(Collectors.groupingBy(Employee::getDepartment));  //Группировка сотрудников по ключам-номерам департаментов последовательно от 1 до 4
-        return map;
+    public Employee maxSalary(int departmentId) {
+        return employees.stream()
+                .filter(e -> e.getDepartment() == departmentId)
+                .max(Comparator.comparingDouble(Employee::getSalary))
+                .orElseThrow(() -> new EmployeeNotFoundException("Сотрудник с максимальной зарплатой не найден"));
     }
 
-    public double sum(int deptId) {
-        return employeeService.getAll() //Список сотрудников из Мапы
-                .stream()
-                .filter(e -> e.getDepartment() == deptId)  //Фильтрация Списка только по нужному департаменту
-                .mapToDouble(Employee::getSalary)  //Вывод значений зарплат с типом данных Double
-                .sum();  //Суммирование зарплат
+    public Employee minSalary(int departmentId) {
+        return employees.stream()
+                .filter(e -> e.getDepartment() == departmentId)
+                .min(Comparator.comparingDouble(Employee::getSalary))
+                .orElseThrow(() -> new EmployeeNotFoundException("Сотрудник с минимальной зарплатой не найден"));
+    }
+
+    public List<Employee> findAllByDept(int departmentId) {
+        return employees.stream()
+                .filter(e -> e.getDepartment() == departmentId)
+                .collect(Collectors.toList());
+    }
+
+    public Map<Integer, List<Employee>> groupDeDept() {
+        return employees.stream()
+                .collect(Collectors.groupingBy(Employee::getDepartment));
     }
 }
